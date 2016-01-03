@@ -36,11 +36,11 @@ vitals = [
 ]
 
 weightlifting = [
-    'dumbbell squat (weight, sets, rep)',
-    'dumbbell bench press (weight, sets, rep)',
-    'dumbbell row (weight, sets, rep)',
-    'dumbbell overhead press (weight, sets, rep)',
-    'dumbbell deadlift (weight, sets, rep)',
+    'squat (weight, sets, rep)',
+    'bench press (weight, sets, rep)',
+    'row (weight, sets, rep)',
+    'overhead press (weight, sets, rep)',
+    'deadlift (weight, sets, rep)',
 ]
 
 activity_levels = [
@@ -109,6 +109,46 @@ def bmr_owen(weight, gender):
     elif gender == 'male':
         return (10.2 * weight) + 879
 
+def bf_dod(waist, naval, hip, neck, height, gender, cm=True):
+    if cm:
+        waist, naval, hip, neck, height = cm_to_in(waist), cm_to_in(naval), cm_to_in(hip), cm_to_in(neck), cm_to_in(height)
+
+    if gender == 'female':
+       return 163.205 * np.log10(waist + hip - neck) - 97.684 * np.log10(height) - 78.387
+    elif gender == 'male':
+        return 86.010 * np.log10(naval - neck) - 70.041 * np.log10(height) + 36.76
+
+def bf_cb(hips, thigh, calf, wrist, gender, age, cm=True):
+    if cm:
+        hips, thigh, calf, wrist = cm_to_in(hips), cm_to_in(thigh), cm_to_in(calf), cm_to_in(wrist)
+
+    if gender == 'female':
+        if age <= 30:
+            return hips + 0.8*thigh - 2*calf - wrist
+        else:
+            return hips + thigh - 2*calf - wrist
+    elif gender == 'male':
+        if age <= 30:
+            return 0.5*hips + thigh - 3*calf - wrist
+        else:
+            return 0.5*hips + thigh - 2.7*calf - wrist
+
+def bf_mod_ymca(weight, wrist, waist, hips, forearm, gender, kg=True, cm=True):
+    if kg:
+        weight = kg_to_lbs(weight)
+    if cm:
+        wrist, waist, hips, forearm = cm_to_in(wrist), cm_to_in(waist), cm_to_in(hips), cm_to_in(forearm)
+
+    if gender == 'female':
+        return (0.268*weight - 0.318*wrist + 0.157*waist + 0.245*hips - 0.434*forearm - 8.987) / weight
+    elif gender == 'male':
+        return (-0.082*weight + 4.15*wrist - 94.42) / weight
+
+def cm_to_in(cm):
+    return cm / 2.54
+
+def kg_to_lbs(kg):
+    return kg / 2.20462
 
 def script(database_file, **kwargs):
 
@@ -163,6 +203,10 @@ def script(database_file, **kwargs):
 
     if input("Enter heart rate decay information? (y/n)" ) in yes:
 
+        print("")
+        print("(Assumption: t=0 is at 5 minutes of rigourous exercise, beginning from a resting heart rate.)")
+        print("")
+
         t = []
         y = []
 
@@ -177,6 +221,7 @@ def script(database_file, **kwargs):
         popt, pcov = curve_fit(exp_func, t, y)
         entry_dict['heart-rate lifetime'] = popt[1]
 
+    #
 
 
 def parse_args(args):
