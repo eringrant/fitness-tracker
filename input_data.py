@@ -196,7 +196,10 @@ def bmr_owen(weight, gender, **kwargs):
 
 
 def bmr(**kwargs):
-
+    """
+    Return the basal metabolic rate (BMR) determined by the parameters in
+    kwargs, averaged over different formulations for computing BMR.
+    """
     bmr_funcs = [
         bmr_katch_mcardle,
         bmr_revised_harris_benedict,
@@ -204,8 +207,6 @@ def bmr(**kwargs):
         bmr_owen,
     ]
 
-    print([f(**kwargs) for f in bmr_funcs])
-    input()
     return np.mean([f(**kwargs) for f in bmr_funcs])
 
 
@@ -262,15 +263,16 @@ def bf_mod_ymca(weight, wrist, waist, hips, forearm, gender, kg=True, cm=True,
 
 
 def bf(**kwargs):
-
+    """
+    Return the bodyfat (BF) percentage determined by the parameters in
+    kwargs, averaged over different formulations for computing BFP.
+    """
     bf_funcs = [
         bf_dod,
         bf_cb,
         bf_mod_ymca,
     ]
 
-    print([f(**kwargs) for f in bf_funcs])
-    input()
     return np.mean([f(**kwargs) for f in bf_funcs])
 
 
@@ -366,12 +368,15 @@ def script(database_file, **kwargs):
         gender = enumerate_choices_and_return_selection(['male', 'female'])
 
         height = sanitised_input('Enter height: ', type_=float)
+        print('')
         print("Choose among the following height units:")
         height_unit = enumerate_choices_and_return_selection(length_units)
 
         if height_unit == 'inch':
             height = inch_to_cm(height)
 
+        print('')
+        print('DATE OF BIRTH:')
         dob_year = sanitised_input('Enter the year of birth: ', type_=int)
         dob_month = sanitised_input('Enter the (numeric) month of birth: ',
                                     type_=int)
@@ -526,8 +531,10 @@ def script(database_file, **kwargs):
                                      min_=60.0, max_=200.0))
 
         popt, pcov = curve_fit(exp_func, t, y)
-        entry_dict['heart-rate lifetime'] = popt[1]
-        entry_dict['heart-rate lifetime measurement time'] =\
+        lifetime = popt[1]
+
+        entry_dict['heart-rate half-life'] = lifetime * np.ln(2)
+        entry_dict['heart-rate half-life measurement time'] =\
             get_time_from_input()
 
     # Add the measurements to the database
@@ -551,8 +558,8 @@ def script(database_file, **kwargs):
         fieldnames += [m + ' measurement time' for m in weightlifting]
         fieldnames += vitals
         fieldnames += [m + ' measurement time' for m in vitals]
-        fieldnames += ['heart-rate lifetime']
-        fieldnames += ['heart-rate lifetime measurement time']
+        fieldnames += ['heart-rate half-life']
+        fieldnames += ['heart-rate half-life measurement time']
 
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
