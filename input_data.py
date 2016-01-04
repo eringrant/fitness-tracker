@@ -68,12 +68,14 @@ weight_units = [
 ]
 
 precision = {
+    'age': 0.01,
     'bf': 0.001,
     'bmr': 0.001,
     'cm': 0.1,
     'inch': 0.1,
-    'kg': 0.5,
-    'lb': 1.,
+    'kg': 0.1,
+    'lb': 0.5,
+    'time': 0.01,
 }
 
 
@@ -115,7 +117,7 @@ def get_time_from_input():
                         print("Invalid format.")
                         break
                 else:
-                    return hours + minutes / 60
+                    return round_to(hours + minutes / 60, precision['time'])
 
 
 def round_to(n, precision):
@@ -407,9 +409,9 @@ def script(database_file, **kwargs):
     entry_dict['height'] = height
     entry_dict['date of birth'] = dob
 
-    entry_dict['age'] = (datetime.now() -
+    entry_dict['age'] = round_to((datetime.now() -
                          datetime(*(int(n) for n in dob.split('-')))).days \
-        / 365
+                        / 365, precision['age'])
 
     print('')
 
@@ -486,7 +488,7 @@ def script(database_file, **kwargs):
         if input("Enter %s stats? (y/n) " % measurement) in yes:
 
             weight = sanitised_input('Enter ' + measurement + ' weight: ',
-                                     type_=int)
+                                     type_=float)
             reps = sanitised_input('Enter ' + measurement + ' reps: ',
                                    type_=int)
 
