@@ -332,7 +332,7 @@ def script(database_file, **kwargs):
         # Will throw an uncaught exception if invalid
         datetime(year=year, month=month, day=day)
 
-    date = str(year) + '-' + str(month) + '-' + str(day)
+    date = '%d-%02d-%02d' % (year, month, day)
 
     database = {}
     database_file = username + '.dat'
@@ -496,9 +496,6 @@ def script(database_file, **kwargs):
             unit = enumerate_choices_and_return_selection(weight_units)
             orm = one_rep_max(weight, reps, unit)
 
-            if unit == 'lb':
-                orm = lb_to_kg(orm)
-
             time = get_time_from_input()
 
             entry_dict[measurement] = round_to(orm, precision['kg'])
@@ -565,7 +562,7 @@ def script(database_file, **kwargs):
 
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        for date in database:
+        for date in sorted(database):
             writer.writerow(database[date])
 
     print('')
